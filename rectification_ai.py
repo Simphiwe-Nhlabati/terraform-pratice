@@ -29,3 +29,6 @@ def get_ai_rectification(issue):
 
     print(f"Fetching AI rectification for issue: {issue}")
     response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
