@@ -6,7 +6,7 @@ github_token = os.getenv("GITHUB_TOKEN")
 repo_name = os.getenv("GITHUB_REPOSITORY")
 pr_number = os.getenv("PR_NUMBER")
 
-DEPLOYMENT_NAME = "aisecuritylab100"
+DEPLOYMENT_NAME = "cloudpratice-ai"
 
 def get_ai_rectification(issue):
 
