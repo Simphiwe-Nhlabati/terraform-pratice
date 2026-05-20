@@ -10,37 +10,45 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+      - uses: actions/checkout@v4
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v4
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v4
 
-      - name: Terraform init & plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      # - name: Terraform init & plan
+      #   env:
+      #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-        run: |
-          terraform init
-          terraform plan -no-color
+      #   run: |
+      #     terraform init
+      #     terraform plan -no-color
+
+      - name: Run Checkov Security Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          soft_fail: true
 
       - name: AI Security Rectification
-        if: github.event_name == 'pull_request'
+        # if: github.event_name == 'pull_request'
         env:
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: python rectification_ai.py
+        run: |
+          pip install requests
+          python rectification_ai.py
 
-      - name: Terraform apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        run: terraform apply -auto-approve
+      # - name: Terraform apply
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   env:
+      #     ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      #     ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      #     ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      #     ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      #   run: terraform apply -auto-approve
